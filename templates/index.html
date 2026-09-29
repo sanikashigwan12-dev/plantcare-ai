@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlantCare AI - Diagnostics & Care Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Google Sans', sans-serif; }
+        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; position: relative; background-color: #121212; color: #202124; }
+
+        .bg-slider { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-size: cover; background-position: center; transition: opacity 1.2s ease-in-out; }
+        .bg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25)); backdrop-filter: blur(2px); z-index: -1; }
+
+        /* Weather Bar Styling */
+        .weather-bar { width: 100%; background: rgba(30, 142, 62, 0.95); color: white; padding: 6px 20px; font-size: 13px; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        header { width: 100%; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.4); padding: 14px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .logo { font-size: 22px; font-weight: 700; color: #1e8e3e; text-decoration: none; }
+        .logo span { color: #1a73e8; }
+        nav a { margin-left: 10px; text-decoration: none; color: #3c4043; font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 20px; transition: 0.3s; }
+        nav a.active, nav a:hover { color: #1a73e8; background: rgba(232, 240, 254, 0.95); }
+
+        .main-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.7); border-radius: 28px; width: 90%; max-width: 650px; margin: 35px 0; padding: 40px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center; position: relative; }
+        
+        .alert-error { background: #fce8e6; color: #c5221f; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 500; border: 1px solid #f5c6cb; text-align: left; }
+        
+        .cam-btn { background: #e8f0fe; color: #1a73e8; border: 1px solid #c2e7ff; padding: 8px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; margin-bottom: 15px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+
+        .upload-area { border: 2px dashed #1a73e8; border-radius: 18px; padding: 30px 20px; background: rgba(248, 254, 255, 0.85); cursor: pointer; text-align: center; position: relative; min-height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; z-index: 10; }
+        #image-preview { max-width: 100%; max-height: 180px; border-radius: 12px; display: none; object-fit: contain; }
+
+        .btn-submit { display: block; margin: 25px auto 0 auto; background-color: #1e8e3e; color: #ffffff; font-size: 16px; font-weight: 600; border: none; padding: 14px 48px; border-radius: 28px; cursor: pointer; box-shadow: 0 4px 12px rgba(30,142,62,0.3); }
+
+        .result-container { margin-top: 32px; border-top: 1px solid #dadce0; padding-top: 24px; text-align: left; }
+        .badge-conf { display: inline-block; background: #e6f4ea; color: #137333; padding: 6px 14px; border-radius: 16px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+        .badge-low { background: #fef7e0; color: #b06000; }
+        
+        .audio-box { background: #f1f3f4; padding: 12px 16px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; border: 1px solid #dadce0; }
+        .audio-btn { background: #1a73e8; color: white; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .audio-btn:hover { background: #1557b0; }
+        .audio-select { padding: 6px 12px; border-radius: 10px; border: 1px solid #dadce0; font-size: 13px; outline: none; background: white; font-weight: 500; }
+
+        /* Severity Meter Styling */
+        .severity-container { margin: 15px 0; background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px 16px; border-radius: 12px; }
+        .severity-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+        .progress-bar-bg { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease-in-out; }
+
+        .btn-pdf { display: inline-block; background: #d93025; color: white; text-decoration: none; padding: 10px 22px; border-radius: 20px; font-weight: 600; font-size: 14px; margin-top: 20px; box-shadow: 0 2px 6px rgba(217,48,37,0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="weather-bar">
+        <span>📍 Location: <strong>Pune, IN</strong></span>
+        <span>☀️️ Temp: <strong>27°C</strong></span>
+        <span>💧 Humidity: <strong>68%</strong></span>
+        <span>🌱 Field Risk: <strong style="color: #ffe082;">Moderate Risk</strong></span>
+    </div>
+
+    <div class="bg-slider" id="bgSlider"></div>
+    <div class="bg-overlay"></div>
+
+    <header>
+        <a href="/" class="logo">🌿 PlantCare <span>AI</span></a>
+        <nav>
+            <a href="/" class="active">Home</a>
+            <a href="/plant-care">Plant Care Guide</a>
+            <a href="/library">Disease Library</a>
+            <a href="/usage">How it Works</a>
+            <a href="/about">About Us</a>
+            {% if session.username %}
+                <a href="/history">History</a>
+                <a href="/logout" style="color: #d93025;">Logout ({{ session.username }})</a>
+            {% else %}
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="main-card">
+        <h1 style="font-size: 28px; color: #1a252c; margin-bottom: 6px;">Plant Health Diagnostic</h1>
+        <p style="color: #5f6368; font-size: 14px; margin-bottom: 20px;">Upload or capture a leaf photo for instant AI diagnosis.</p>
+
+        {% if error_msg %}
+            <div class="alert-error">{{ error_msg }}</div>
+        {% endif %}
+
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            
+            <button type="button" class="cam-btn" onclick="openCamera()">📷 Use Camera to Capture</button>
+
+            <div class="upload-area">
+                <input type="file" name="file" id="fileInput" accept="image/*" capture="environment" required onchange="previewFile()">
+                
+                <div id="upload-prompt">
+                    <div style="font-weight: 600; font-size: 16px; color: #1a73e8;">Click or drag leaf photo here</div>
+                    <div style="font-size: 12px; color: #70757a; margin-top: 4px;">Supports JPG, PNG formats</div>
+                </div>
+
+                <img id="image-preview" src="#" alt="Selected Leaf Preview">
+            </div>
+
+            <button type="submit" class="btn-submit">Analyze Health</button>
+        </form>
+
+        {% if prediction %}
+            <div class="result-container">
+                
+                <div class="audio-box">
+                    <div style="font-weight: 600; font-size: 13px; color: #3c4043;">🔊 Voice Advisory:</div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="voiceLang" class="audio-select">
+                            <option value="en-US">English</option>
+                            <option value="mr-IN">Marathi (मराठी)</option>
+                        </select>
+                        <button class="audio-btn" onclick="speakResult()">▶ Listen</button>
+                    </div>
+                </div>
+
+                {% if confidence > 75 %}
+                    <span class="badge-conf">🟢 High Confidence: {{ confidence }}%</span>
+                {% else %}
+                    <span class="badge-conf badge-low">⚠️ Low Confidence: {{ confidence }}% - Please upload a clearer leaf image</span>
+                {% endif %}
+
+                <div style="font-size: 20px; color: #d93025; font-weight: 700;">Condition: {{ prediction }}</div>
+                <div style="font-size: 14px; color: #5f6368; margin-bottom: 14px;">Affected Plant: {{ plant_name }}</div>
+                
+                <!-- Severity Progress Bar -->
+                <div class="severity-container">
+                    <div class="severity-header">
+                        <span>📊 Disease Severity Index:</span>
+                        <span style="color: {% if severity == 'Severe' %}#d93025{% elif severity == 'Moderate' %}#f2994a{% else %}#27ae60{% endif %};">
+                            {{ severity }} ({{ severity_level }}%)
+                        </span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: {{ severity_level }}%; background: {% if severity == 'Severe' %}#d93025{% elif severity == 'Moderate' %}#f2994a{% else %}#27ae60{% endif %};"></div>
+                    </div>
+                </div>
+
+                <div style="font-weight: 700; margin-top: 12px;">Disease Overview:</div>
+                <p id="desc-text" style="font-size: 14px; color: #3c4043;">{{ description }}</p>
+
+                <div style="font-weight: 700; margin-top: 12px;">🛡️ Prevention Steps:</div>
+                <ul id="prev-text" style="padding-left: 20px; font-size: 14px;">
+                    {% for item in prevention %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+
+                <div style="font-weight: 700; margin-top: 12px;">🧪 Treatments & Remedies:</div>
+                <ul id="remedy-text" style="padding-left: 20px; font-size: 14px;">
+                    {% for remedy in remedies %}
+                        <li>{{ remedy }}</li>
+                    {% endfor %}
+                </ul>
+
+                {% if weather_tip %}
+                    <div style="background: #fff8e1; border-left: 4px solid #ffb300; padding: 12px 16px; margin-top: 18px; border-radius: 8px; text-align: left;">
+                        <div style="font-weight: 700; color: #b78103; font-size: 14px;">🌦️ Weather Impact Advisory:</div>
+                        <p style="font-size: 13px; color: #5d4037; margin-top: 4px;">{{ weather_tip }}</p>
+                    </div>
+                {% endif %}
+
+                <a href="/download-pdf" class="btn-pdf">📄 Download Diagnosis PDF Report</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const bgImages = [
+            'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1920&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=1920&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1592417817098-8f3d6ef23a81?q=80&w=1920&auto=format&fit=crop'
+        ];
+
+        let currentImgIndex = 0;
+        const bgSlider = document.getElementById('bgSlider');
+
+        bgImages.forEach(src => { const img = new Image(); img.src = src; });
+
+        function changeBackground() {
+            bgSlider.style.opacity = 0.3;
+            setTimeout(() => {
+                bgSlider.style.backgroundImage = `url('${bgImages[currentImgIndex]}')`;
+                bgSlider.style.opacity = 1;
+                currentImgIndex = (currentImgIndex + 1) % bgImages.length;
+            }, 500);
+        }
+
+        changeBackground();
+        setInterval(changeBackground, 7000);
+
+        function openCamera() {
+            document.getElementById('fileInput').click();
+        }
+
+        function previewFile() {
+            const file = document.getElementById('fileInput').files[0];
+            const preview = document.getElementById('image-preview');
+            const promptText = document.getElementById('upload-prompt');
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+                promptText.style.display = 'none';
+            }
+        }
+
+        function speakResult() {
+            const plant = "{{ plant_name }}";
+            const condition = "{{ prediction }}";
+            const desc = document.getElementById('desc-text').innerText;
+            const lang = document.getElementById('voiceLang').value;
+
+            let textToRead = "";
+            if (lang === 'mr-IN') {
+                textToRead = `झाडाचे नाव: ${plant}. लागण झालेला रोग: ${condition}. माहिती: ${desc}`;
+            } else {
+                textToRead = `Plant name: ${plant}. Diagnosed condition: ${condition}. Summary: ${desc}`;
+            }
+
+            const audioUrl = `/speak?text=${encodeURIComponent(textToRead)}&lang=${lang}`;
+            const audio = new Audio(audioUrl);
+            audio.play();
+        }
+    </script>
+</body>
+</html>

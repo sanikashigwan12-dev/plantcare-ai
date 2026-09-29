@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Disease Library - PlantCare AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Google Sans', sans-serif; }
+        body { background: #f8f9fa; color: #202124; }
+        header { width: 100%; background: #ffffff; border-bottom: 1px solid #dadce0; padding: 14px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 22px; font-weight: 700; color: #1e8e3e; text-decoration: none; }
+        .logo span { color: #1a73e8; }
+        nav a { margin-left: 10px; text-decoration: none; color: #3c4043; font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 20px; }
+        nav a.active { color: #1a73e8; background: #e8f0fe; }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: #1e8e3e; margin-bottom: 10px; }
+        p.sub { color: #5f6368; font-size: 14px; margin-bottom: 25px; }
+
+        .search-box { width: 100%; padding: 14px 20px; border-radius: 28px; border: 1px solid #dadce0; font-size: 15px; outline: none; margin-bottom: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .card { background: white; border: 1px solid #dadce0; border-radius: 16px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .plant-badge { display: inline-block; background: #e8f0fe; color: #1a73e8; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+        .disease-title { font-size: 17px; font-weight: 700; color: #d93025; margin-bottom: 8px; }
+        .desc { font-size: 13px; color: #3c4043; line-height: 1.5; margin-bottom: 12px; }
+        .symp { font-size: 12px; color: #5f6368; background: #f1f3f4; padding: 8px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">🌿 PlantCare <span>AI</span></a>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/plant-care">Plant Care Guide</a>
+            <a href="/library" class="active">Disease Library</a>
+            {% if session.username %}
+                <a href="/history">History</a>
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>🔍 Crop Disease Search Library</h1>
+        <p class="sub">Explore and search plant diseases, symptoms, and control measures across different crops.</p>
+
+        <form action="/library" method="get">
+            <input type="text" name="search" class="search-box" placeholder="Search by crop or disease name (e.g. Tomato, Blight, Rose)..." value="{{ search_query }}">
+        </form>
+
+        <div class="grid">
+            {% for key, item in diseases.items() %}
+                <div class="card">
+                    <span class="plant-badge">🌱 {{ item.plant_name }}</span>
+                    <div class="disease-title">{{ item.disease_name }}</div>
+                    <div class="desc">{{ item.description }}</div>
+                    <div class="symp"><strong>Symptoms:</strong> {{ item.symptoms }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

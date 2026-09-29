@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plant Care Guide - PlantCare AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Google Sans', sans-serif; }
+        body { background: #f8f9fa; color: #202124; }
+        header { width: 100%; background: #ffffff; border-bottom: 1px solid #dadce0; padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 22px; font-weight: 700; color: #1e8e3e; text-decoration: none; }
+        .logo span { color: #1a73e8; }
+        nav a { margin-left: 20px; text-decoration: none; color: #5f6368; font-weight: 500; padding: 8px 14px; border-radius: 20px; }
+        nav a.active { color: #1a73e8; background: #e8f0fe; }
+
+        .container { max-width: 750px; margin: 40px auto; background: white; padding: 36px; border-radius: 20px; border: 1px solid #dadce0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        h1 { color: #1e8e3e; margin-bottom: 20px; font-size: 26px; }
+        select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #dadce0; font-size: 15px; margin-bottom: 25px; outline: none; }
+        
+        .care-card { background: #f8feff; border: 1px solid #c2e7ff; border-radius: 12px; padding: 20px; margin-top: 15px; }
+        .care-item { display: flex; align-items: flex-start; margin-bottom: 16px; }
+        .care-icon { font-size: 22px; margin-right: 15px; }
+        .care-title { font-weight: 700; color: #1f1f1f; font-size: 15px; }
+        .care-desc { color: #444746; font-size: 14px; margin-top: 2px; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">🌿 PlantCare <span>AI</span></a>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/plant-care" class="active">Plant Care</a>
+            {% if session.username %}
+                <a href="/history">History</a>
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>🪴 Plant Care & Cultivation Guide</h1>
+        <p style="color: #5f6368; margin-bottom: 20px; font-size: 14px;">Select your plant type to get optimal growth conditions & care requirements:</p>
+        
+        <form action="/plant-care" method="post">
+            <select name="plant_name" onchange="this.form.submit()">
+                {% for p in plants %}
+                    <option value="{{ p }}" {% if p == plant_name %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <div class="care-card">
+            <h2 style="color: #1a73e8; font-size: 20px; margin-bottom: 18px;">Care Guide for {{ plant_name }}</h2>
+            
+            <div class="care-item">
+                <div class="care-icon">☀️</div>
+                <div>
+                    <div class="care-title">Sunlight</div>
+                    <div class="care-desc">{{ care.sunlight }}</div>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-icon">💧</div>
+                <div>
+                    <div class="care-title">Watering Schedule</div>
+                    <div class="care-desc">{{ care.water }}</div>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-icon">🌱</div>
+                <div>
+                    <div class="care-title">Soil & pH Level</div>
+                    <div class="care-desc">{{ care.soil }}</div>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-icon">🧪</div>
+                <div>
+                    <div class="care-title">Fertilizers & Nutrition</div>
+                    <div class="care-desc">{{ care.fertilizer }}</div>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-icon">🌡️</div>
+                <div>
+                    <div class="care-title">Ideal Temperature</div>
+                    <div class="care-desc">{{ care.temperature }}</div>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-icon">✂️</div>
+                <div>
+                    <div class="care-title">Pruning & Maintenance</div>
+                    <div class="care-desc">{{ care.pruning }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
